@@ -1,0 +1,56 @@
+01-微信二次修改title
+code:
+changeWeiChatTitle:function(title,pic){
+    document.title =  title;
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('src', pic);
+    iframe.addEventListener('load', function () {
+        setTimeout(function(){document.body.removeChild(iframe)},0) ;
+    });
+    document.body.appendChild(iframe);
+}
+说明：
+当iframe加入浏览器，没有setTimeOut的情况，iframe被remove了，所以不能正常修改title。
+此时，浏览器可能还没有来得及反应，但是加了setTimeOut，就相当于给浏览器的反应时间。
+具体的原因是跟浏览器的线程有关系
+02-抓包工具
+fiddler2+ Rosin + Willow
+  Rosin可以直接打印出log
+  willow 可以直接替换本地文件，以及修改host
+如果需要深研的话，可以尝试使用wireshark
+03-tap点击穿透问题
+方案一：fastclick.js
+
+方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()
+
+$("#cbFinish").on("touchend", function (event) {
+  //很多处理比如隐藏什么的
+  event.preventDefault();
+});
+方案三：延迟一定的时间(300ms+)来处理事件
+
+$("#cbFinish").on("tap", function (event) {
+  setTimeout(function(){
+  //很多处理比如隐藏什么的
+  },320);
+});
+04-记一次闪屏的问题
+点击一个toggle的效果，会出现闪屏的情况，体验很不好
+if($('.js-click-actived').hasClass('actived')){
+        $('.js-click-actived').removeClass('actived');
+}else{
+
+        $('.js-click-actived').addClass('actived');
+}
+加上setTimeout可以进一步控制，能给浏览器时间进行渲染和反应
+原理应该就是线程问题 和线程假死问题
+if($('.js-click-actived').hasClass('actived')){
+    setTimeout(function(){
+        $('.js-click-actived').removeClass('actived');
+    },10);
+}else{
+    setTimeout(function(){
+        $('.js-click-actived').addClass('actived');
+    },10);
+}
+
