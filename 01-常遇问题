@@ -1,56 +1,128 @@
 01-微信二次修改title
 code:
-changeWeiChatTitle:function(title,pic){
-    document.title =  title;
-    var iframe = document.createElement('iframe');
-    iframe.setAttribute('src', pic);
-    iframe.addEventListener('load', function () {
-        setTimeout(function(){document.body.removeChild(iframe)},0) ;
-    });
-    document.body.appendChild(iframe);
-}
-说明：
-当iframe加入浏览器，没有setTimeOut的情况，iframe被remove了，所以不能正常修改title。
-此时，浏览器可能还没有来得及反应，但是加了setTimeOut，就相当于给浏览器的反应时间。
-具体的原因是跟浏览器的线程有关系
+    changeWeiChatTitle:function(title,pic){
+        document.title =  title;
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('src', pic);
+        iframe.addEventListener('load', function () {
+            setTimeout(function(){document.body.removeChild(iframe)},0) ;
+        });
+        document.body.appendChild(iframe);
+    }
+    说明：
+    当iframe加入浏览器，没有setTimeOut的情况，iframe被remove了，所以不能正常修改title。
+    此时，浏览器可能还没有来得及反应，但是加了setTimeOut，就相当于给浏览器的反应时间。
+    具体的原因是跟浏览器的线程有关系
 02-抓包工具
-fiddler2+ Rosin + Willow
-  Rosin可以直接打印出log
-  willow 可以直接替换本地文件，以及修改host
-如果需要深研的话，可以尝试使用wireshark
-03-tap点击穿透问题
-方案一：fastclick.js
+    fiddler2+ Rosin + Willow
+      Rosin可以直接打印出log
+      willow 可以直接替换本地文件，以及修改host
+    如果需要深研的话，可以尝试使用wireshark
+    03-tap点击穿透问题
+    方案一：fastclick.js
 
-方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()
+    方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()
 
-$("#cbFinish").on("touchend", function (event) {
-  //很多处理比如隐藏什么的
-  event.preventDefault();
-});
-方案三：延迟一定的时间(300ms+)来处理事件
+    $("#cbFinish").on("touchend", function (event) {
+      //很多处理比如隐藏什么的
+      event.preventDefault();
+    });
+    方案三：延迟一定的时间(300ms+)来处理事件
 
-$("#cbFinish").on("tap", function (event) {
-  setTimeout(function(){
-  //很多处理比如隐藏什么的
-  },320);
-});
+    $("#cbFinish").on("tap", function (event) {
+      setTimeout(function(){
+      //很多处理比如隐藏什么的
+      },320);
+    });
 04-记一次闪屏的问题
-点击一个toggle的效果，会出现闪屏的情况，体验很不好
-if($('.js-click-actived').hasClass('actived')){
-        $('.js-click-actived').removeClass('actived');
-}else{
+    点击一个区域toggle的效果，会出现闪屏的情况，体验很不好
 
-        $('.js-click-actived').addClass('actived');
-}
-加上setTimeout可以进一步控制，能给浏览器时间进行渲染和反应
-原理应该就是线程问题 和线程假死问题
-if($('.js-click-actived').hasClass('actived')){
-    setTimeout(function(){
-        $('.js-click-actived').removeClass('actived');
-    },10);
-}else{
-    setTimeout(function(){
-        $('.js-click-actived').addClass('actived');
-    },10);
-}
+    if($('.js-click-actived').hasClass('actived')){
+            $('.js-click-actived').removeClass('actived');
+    }else{
+
+            $('.js-click-actived').addClass('actived');
+    }
+    加上setTimeout可以进一步控制，能给浏览器时间进行渲染和反应
+
+    if($('.js-click-actived').hasClass('actived')){
+        setTimeout(function(){
+            $('.js-click-actived').removeClass('actived');
+        },10);
+    }else{
+        setTimeout(function(){
+            $('.js-click-actived').addClass('actived');
+        },10);
+    }
+05-处理数据，四舍五入，保留小数点的问题
+    <script type="text/javascript">
+        //保留两位小数
+        //功能：将浮点数四舍五入，取小数点后2位
+        function toDecimal(x) {
+            var f = parseFloat(x);
+            if (isNaN(f)) {
+                return;
+            }
+            f = Math.round(x*100)/100;
+            return f;
+        }
+
+
+        //制保留2位小数，如：2，会在2后面补上00.即2.00
+        function toDecimal2(x) {
+            var f = parseFloat(x);
+            if (isNaN(f)) {
+                return false;
+            }
+            var f = Math.round(x*100)/100;
+            var s = f.toString();
+            var rs = s.indexOf('.');
+            if (rs < 0) {
+                rs = s.length;
+                s += '.';
+            }
+            while (s.length <= rs + 2) {
+                s += '0';
+            }
+            return s;
+        }
+
+        function fomatFloat(src,pos){
+             return Math.round(src*Math.pow(10, pos))/Math.pow(10, pos);
+        }
+        //四舍五入
+        alert("保留2位小数：" + toDecimal(3.14159267));
+        alert("强制保留2位小数：" + toDecimal2(3.14159267));
+        alert("保留2位小数：" + toDecimal(3.14559267));
+        alert("强制保留2位小数：" + toDecimal2(3.15159267));
+        alert("保留2位小数：" + fomatFloat(3.14559267, 2));
+        alert("保留1位小数：" + fomatFloat(3.15159267, 1));
+
+        //五舍六入
+        alert("保留2位小数：" + 1000.003.toFixed(2));
+        alert("保留1位小数：" + 1000.08.toFixed(1));
+        alert("保留1位小数：" + 1000.04.toFixed(1));
+        alert("保留1位小数：" + 1000.05.toFixed(1));
+
+        //科学计数
+        alert(3.1415.toExponential(2));
+        alert(3.1455.toExponential(2));
+        alert(3.1445.toExponential(2));
+        alert(3.1465.toExponential(2));
+        alert(3.1665.toExponential(1));
+        //精确到n位，不含n位
+        alert("精确到小数点第2位" + 3.1415.toPrecision(2));
+        alert("精确到小数点第3位" + 3.1465.toPrecision(3));
+        alert("精确到小数点第2位" + 3.1415.toPrecision(2));
+        alert("精确到小数点第2位" + 3.1455.toPrecision(2));
+        alert("精确到小数点第5位" + 3.141592679287.toPrecision(5));
+    </script>
+06-js的整数和浮点数
+code:
+    0.1+0.2===0.3   false
+说明:
+   js内部，所有的数字都是以64位浮点数形式存储的，即使整数也是如此.
+   换句话来说，js的底层根本没有整数，所有数字都是小数（64位的浮点数）。
+   容易造成的混淆的是，某些运算只有整数才能完成
+   此时js自动回吧64位浮点数转成32位的整数，再进行运算
 
