@@ -14,7 +14,7 @@ changeWeiChatTitle:function(title,pic){
 此时，浏览器可能还没有来得及反应，但是加了setTimeOut，就相当于给浏览器的反应时间。
 具体的原因是跟浏览器的线程有关系
 02-抓包工具
-fiddler2+ Rosin + Willow
+fiddler2+ Rosin + Willow -->移动端开发
   Rosin可以直接打印出log
   willow 可以直接替换本地文件，以及修改host
 如果需要深研的话，可以尝试使用wireshark
