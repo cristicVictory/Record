@@ -53,4 +53,206 @@ if($('.js-click-actived').hasClass('actived')){
         $('.js-click-actived').addClass('actived');
     },10);
 }
+05-setTimeout续集
+setTimeout调用的函数被执行时的上下文是全局，而不再是调用setTimeout方法时的上下文。
+所以，setTimeout的第一个参数的函数被执行时其this是指向window的，
+如果需要保留调用setTimeout方法时的this，就需要把当时的this传进去。
+示例：
+            function Person(name){
+                this.name=name;
+                var f=function(){
+                alert('My name is '+this.name)
+                };
+                // setTimeout(f,50); //错误
+                var THIS=this;
+                setTimeout(function(){f.apply(THIS)},50); //正确，通用
+                setTimeout(function(){f.call(THIS)},50); //正确，通用
+            }
+            new Person('Jack');
+            ps:可以直接看chrome里面的当前环境就更加清楚
+运行机制:
+setTimeout 和setInterval 的运行机制是，将指定的代码移除本次的执行，等到下一轮EventLoop时，
+再检查是否到了指定的时间。如果到了，就执行对应的代码；如果不到，就等下一轮的EventLoop时重新判断
+setTimeout(someTask,100)
+veryLongTask()
+上面代码的setTimeout，指定100毫秒以后运行一个任务。但是，如果后面立即运行的任务（当前脚本的同步任务））
+非常耗时，过了100毫秒还无法结束，那么被推迟运行的someTask就只有等着，等到前面的veryLongTask运行结束，才轮到它执行。
+--------------------------------------------------------------------------------------------------------------------
+setTimeout(f,0)
+setTimeout的作用是将代码推迟到指定时间执行，如果当前设定的时间为0，那么也不会立即执行
+必须等到当前脚本的同步任务和“任务队列”中已有的事件，全部处理完以后，才会执行setTimeout指定的任务
+setTimeout真正的作用是 在消息队列上面添加一个消息，规定在指定时间执行某段代码
+setTimeout(f,0) 表示是尽可能早的执行这个任务
+----------------------------------------------------------------------------------------------------------------
+异步问题的思考
+javascript采用的是单线程模型
+单线程模型带来的问题，主要是新的任务被添加在队列尾部，只有前面所有的任务运行结束，才会轮到它执行。如果有一个任务特别耗时，后面的任务都会停在那里等待，造成了
+浏览器失去响应，又称为假死。所以javascript内部使用了EventLoop的机制进行处理。
+EventLoop是一个程序结构，用于等待和发送消息和事件。
 
+06.判断文本是不是超过一行
+    场景：
+        当文本框超过一行，就显示向下的箭头或者某种样式
+    -------------------------------------------------
+    解决办法：
+        参照文本框a:该文本框高度是不会变化的,高度为aHight
+        需要判断文本框b:该文本框高度自动撑开高度为bHight
+        aHight = bHight 说明该文本没有超过一行
+        bHight > bHight 说明该文本超过一行
+    说明：参照文本框可以是b文本框的lineHight，也可以是等高的文本框
+   
+07.忘记本地数据库密码的问题 windows 操纵步骤
+    1).停止MYSQL服务，CMD打开DOS窗口，输入 net stop mysql 
+    2).在CMD命令行窗口，进入MYSQL安装目录 比如E:\Program Files\MySQL\MySQL Server 5.0\bin 
+        示范命令: 
+        输入 e:回车, 
+        输入cd "E:\Program Files\MySQL\MySQL Server 5.0\bin" 
+        注意双引号也要输入,这样就可以进入Mysql安装目录了. 
+    3).进入mysql安全模式，即当mysql起来后，不用输入密码就能进入数据库。 
+        命令为： mysqld-nt --skip-grant-tables 
+    4).重新打开一个CMD命令行窗口，输入mysql -uroot -p，使用空密码的方式登录MySQL（不用输入密码，直接按回车） 
+    5).输入以下命令开始修改root用户的密码（注意：命令中mysql.user中间有个“点”） 
+        mysql> update mysql.user set password=PASSWORD('新密码') where User='root'; 
+    6).刷新权限表 
+    mysql> flush privileges; 
+    7).退出 
+    mysql> quit 
+    这样MYSQL超级管理员账号 ROOT已经重新设置好了，接下来 在任务管理器里结束掉 mysql-nt.exe 这个进程，重新启动MYSQL即可！（也可以直接重新启动服务器） 
+    MYSQL重新启动后，就可以用新设置的ROOT密码登陆MYSQL了！
+08.页面内容不缓存
+ <meta http-equiv="pragma" content="no-cache">
+ <meta http-equiv="cache-control" content="no-cache">
+ <meta http-equiv="expires" content="0"> 
+09.Function.prototype.apply.call(log, console, arguments); 
+var console = window.console || {log: function () {}};var log = console.log;
+console.log = function(tips,message){Function.prototype.apply.call(log, console, arguments);
+//Function.prototype.call.call(log, console, arguments);
+//Function.prototype.call.apply(log, [console, arguments]); 
+//传统方式
+//var args=[].slice.call(arguments);
+//log.apply(console,args);}
+
+分析:
+该怎么理解Function.prototype.apply.call(log,console,arguments);呢
+首先可以将Function.prototype.apply看成一个整体-->FunctionApply
+FunctionApply.call(log,console,arguments);
+那么将此句翻译一下
+log.FunctionApply(console,arguments);
+然后再翻译一下,你就懂了吧,就是一个普通方法调用了
+console.log(arguments);
+发散思维:
+Function.prototype.call.apply(log,[console.arguments]);
+FunctionCall.apply(log,[console,arguments]);
+log.FunctionCall(console,arguments);
+console.log(arguments);
+10.$.ajax回调一致会报错
+    $.ajax when callback is same,the js bug
+    重现问题，当重写jsonp和使用zepto.js会直接报错
+    回调函数名称一致，会直接报错
+    zepto.js存在同样的问题
+    出问题的位置 _callbackName() : _callbackName) || ('jsonp' + (++jsonpID)),  将jsonpId修改成动态的生成的就可以  
+11.js命名空间学习（避免冲突、闭包、匿名函数）
+    命名空间需要匿名函数，闭包（function(){}）()
+    由于不同合作者之间写代码，也许没有沟通好命名或者就是要彻底避免改问题，可以采用
+    （function(){}）()
+    例如：
+    (function a(){
+    doSomething();
+    } 
+    window['test']={};
+    window['test']['a']=a;
+    )();
+11.字符串常用的几个参数
+    1). concat 将两个字符串连接起来，返回一个新的字符串
+    2). indexOf 返回字符串中一个子串第一处出现的索引。如果没有匹配的返回的是-1
+    3). substring() 传入参数是起始位置和结束位置
+    4). substr() 传入参数是起始位置和长度
+    5). search   '123'.search('1')    '123'.search('qwe')
+    6). slice 提取字符串的一部分，并返回新的字符串
+    7). split 通过字符串划成子串，将一个字符串做成一个字符串数组
+12.关于短视频问题的汇总
+问题：h5 video 的 control 有些自动消失，有些不消失。
+解决：可以绑定click事件来控制video加上和移除control属性，自己来控制它消失于不消失。
+
+问题：h5 video 有些有全屏按钮，有些没有。有全屏按钮的点击却没有效果。
+解决：统一去掉全屏那个按钮。
+
+/*http://www.cfanz.cn/?c=article&a=read&id=252662*/video::-webkit-media-controls-fullscreen-button {display: none !important;}
+问题：Android视频不能自动播放
+解决：这是不能解决的。视频播放是系统级别，手机需要真正的手指点击视频，而不是代码调用play就可以播放。
+
+问题：h5 video 有可能出现黑屏（或静止图片），但有声音。
+解决：这很有可能就是视频解码问题。询问一下Android的同事，得知是Android设置硬解或软解的问题。
+
+问题：h5 video有些需要点击2次才能播放。
+解决：如果在点击第一次判断是否wifi环境是异步操作时，然后是否确定要播放还是询问用户。有些手机会就认为播放的行为是代码级别，而不是用户主动触发。
+
+问题：播放器开始播放时，会黑屏2秒左右。
+解决：这个目前没有发现解决的方案。
+
+13.页面劫持问题报到
+1）紧急解决方案
+    设置mate标签进行临时规避
+    <meta http-equiv="Content-Security-Policy" content="script-src 'unsafe-inline' 'unsafe-eval' *.kanimg.com *.sandai.net *.xunlei.com viewerproxy.niu.xunlei.com:17061">
+2）修改载入的方法进行对劫持的免疫
+
+14.关于闭包的解释
+    1). 闭包更多作用
+    封闭变量
+    延续局部变量的寿命
+    
+    //把img变量用闭包封闭起来，便能解决请求丢失的问题
+    var report = (function(){
+        var imgs = [];
+        return function( src ){
+            var img = new Image();
+            imgs.push( img );
+            img.src = src;
+        }
+    })();
+
+2). 闭包与内存管理
+    局部变量本来应该在函数退出的时候被解除引用，但如果局部变量被封闭在闭包形成的环境中，
+    那么这个局部变量就能一直生存下去。如果在将来需要回收这些变量，我们可以手动把这些变量设为null。
+    跟闭包和内存泄露有关系的地方是，使用闭包的同时比较容易形成循环引用，
+    如果闭包的作用域链中保存着一些DOM节点，这时候就有可能造成内存泄露。
+    但这本身并非闭包的问题，也并非JavaScript的问题。
+    如果要解决循环引用带来的内存泄露问题，我们只需要把循环引用中的变量设为null即可。
+    将变量设置为null意味着切断变量与它此前引用的值之间的连接。当垃圾收集器下次运行时，
+    就会删除这些值并回收它们占用的内存。
+    
+    《JavaScript权威指南》
+    
+    JavaScript也采用词法作用域（lexical scoping），也就是说，函数的执行依赖于变量作用域，
+    这个作用域是在函数定义时决定的，而不是函数调用时决定的。
+    为了实现这种词法作用域，JavaScript函数对象的内部状态不仅包含函数的代码逻辑，
+    还必须引用当前的作用域链。函数对象可以通过作用域链相互关联起来，
+    函数体内部的变量都可以保存在函数作用域内，这种特性在计算机科学文献中称为“闭包”。
+    从技术的角度讲，所有的JavaScript函数都是闭包：它们都是对象，它们都关联到作用域链。
+    是如果这个函数定义了嵌套的函数，并将它作为返回值返回或者存储在某处的属性里，
+    这时就会有一个外部引用指向这个嵌套的函数。它就不会被当做垃圾回收，并且它所指向的变量绑定对象也不会被当做垃圾回收。
+15.iframe+document.domain
+    a.html proxy.html
+    -----------------------------------------------------------
+    a.html  【m.aaa.com】
+    <iframe name="__proxyIframe" src="http://interface.m.aaa.com/proxy.html" style="display: none"></iframe> 
+    name 在此处相当于一个id,nameValue== Iframe的window 
+    proxy.html  [interface.aaa.com]
+    document.domain = "m.aaa.com" 设置html 所在的域名
+    //给父网页写入一个方法，并调用
+    if(parent._method){//兼容旧的方式
+    parent._method()；
+    }
+    a.html里面的js
+    window.method = function(){  //相当于a.html里面的js的入口 【main】
+    }
+    名词说明
+    parent:当前框架的同义词
+    window：指窗体
+    document指页面，是window一个子对象
+    
+    
+    
+    
+    
+    
