@@ -25,3 +25,7 @@ lambda 演算的本质为 一切皆函数，函数可以作为另外一个函数
 函数式：函数作为一等公民的对象进行数据集
 函数式语言的语法必须要顾及到特定的设计模式，比如类型推断系统和匿名函数。大体上，这个语言必须实现lambda演算。 
 并且解释器的求值策略必须是非严格、按需调用的（也叫做延迟执行），它允许不变数据结构和非严格、惰性求值。
+
+函数式编程行话
+functional-programming-jargon
+https://github.com/hemanth/functional-programming-jargon
