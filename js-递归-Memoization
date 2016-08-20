@@ -1,0 +1,52 @@
+1.递归
+2.js中递归存在的问题
+3.memoirization
+---------------------------------------------------
+1.递归
+function fib(n) {
+if (n < 2) {
+return n;
+}
+    return fib(n - 1) + fib(n - 2);
+}
+
+2.js中递归存在的问题
+太多的递归会让浏览器变得越来越慢直到死掉或者莫名其妙的突然自动退出
+function memoizer(fundamental, cache) {
+  cache = cache || {};
+  var shell = function(arg) {
+      if (! (arg in cache)) {
+          cache[arg] = fundamental(shell, arg);
+      }
+      return cache[arg];
+  };
+  return shell;}
+递归转换为迭代
+function merge(left, right) {
+  var result = [];
+  while (left.length > 0 && right.length > 0) {
+      if (left[0] < right[0]) {
+          result.push(left.shift());
+      } else {
+          result.push(right.shift());
+      }
+  }
+  return result.concat(left).concat(right);
+}
+
+//采用递归实现的归并排序算法
+function mergeSort(items) {
+  if (items.length == 1) {
+      return items;
+  }
+  var middle = Math.floor(items.length / 2),
+  left = items.slice(0, middle),
+  right = items.slice(middle);
+  return merge(mergeSort(left), mergeSort(right));
+}
+ 
+var fibonacci = memoizer(function(recur, n) {
+  return recur(n - 1) + recur(n - 2);
+}, {
+3. memoirization
+Memoization 是一种将函数返回值缓存起来的方法，Memoization 原理非常简单，就是把函数的每次执行结果都放入一个键值对(数组也可以，视情况而定)中，在接下来的执行中，在键值对中查找是否已经有相应执行过的值，如果有，直接返回该值，没有才 真正执行函数体的求值部分。很明显，找值，尤其是在键值对中找值，比执行函数快多了。类似Cache的概念
