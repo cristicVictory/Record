@@ -13,15 +13,11 @@ changeWeiChatTitle:function(title,pic){
 当iframe加入浏览器，没有setTimeOut的情况，iframe被remove了，所以不能正常修改title。
 此时，浏览器可能还没有来得及反应，但是加了setTimeOut，就相当于给浏览器的反应时间。
 具体的原因是跟浏览器的线程有关系
--------------------------------------------------------------------
-
 02-抓包工具
 fiddler2+ Rosin + Willow
   Rosin可以直接打印出log
   willow 可以直接替换本地文件，以及修改host
 如果需要深研的话，可以尝试使用wireshark
--------------------------------------------------------------------
-
 03-tap点击穿透问题
 方案一：fastclick.js
 
@@ -38,8 +34,6 @@ $("#cbFinish").on("tap", function (event) {
   //很多处理比如隐藏什么的
   },320);
 });
--------------------------------------------------------------------
-
 04-记一次闪屏的问题
 点击一个toggle的效果，会出现闪屏的情况，体验很不好
 if($('.js-click-actived').hasClass('actived')){
@@ -60,40 +54,3 @@ if($('.js-click-actived').hasClass('actived')){
     },10);
 }
 
--------------------------------------------------------------------
-
-05-忘记本地数据库密码的问题 windows 操纵步骤
-1.停止MYSQL服务，CMD打开DOS窗口，输入 net stop mysql
-2.在CMD命令行窗口，进入MYSQL安装目录 比如E:\Program Files\MySQL\MySQL Server 5.0\bin
-示范命令:
-输入 e:回车,
-输入cd "E:\Program Files\MySQL\MySQL Server 5.0\bin"
-注意双引号也要输入,这样就可以进入Mysql安装目录了.
-3.进入mysql安全模式，即当mysql起来后，不用输入密码就能进入数据库。
-命令为： mysqld-nt --skip-grant-tables
-4.重新打开一个CMD命令行窗口，输入mysql -uroot -p，使用空密码的方式登录MySQL（不用输入密码，直接按回车）
-5.输入以下命令开始修改root用户的密码（注意：命令中mysql.user中间有个“点”）
-mysql> update mysql.user set password=PASSWORD('新密码') where User='root';
-6.刷新权限表
-mysql> flush privileges;
-7.退出
-mysql> quit
-这样MYSQL超级管理员账号 ROOT已经重新设置好了，接下来 在任务管理器里结束掉 mysql-nt.exe 这个进程，重新启动MYSQL即可！（也可以直接重新启动服务器）
-MYSQL重新启动后，就可以用新设置的ROOT密码登陆MYSQL了！
-
-------------------------------------------------------------------
-
-06.iframe+document.domain
-
-a.html  【m.aaa.com】
-<iframe name="__proxyIframe" src="http://interface.m.aaa.com/proxy.html" style="display: none"></iframe>
-name 在此处相当于一个id,nameValue== Iframe的window
-proxy.html  [interface.aaa.com]
-document.domain = "m.aaa.com" 设置html 所在的域名
-//给父网页写入一个方法，并调用
-if(parent._method){//兼容旧的方式
-parent._method()；
-}
-a.html里面的js
-window.method = function(){  //相当于a.html里面的js的入口 【main】
-}
